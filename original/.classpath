@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="external/src/main/java"/>
-	<classpathentry kind="lib" path="external/lib/asm-3.1.jar"/>
-	<classpathentry kind="lib" path="external/lib/asm-commons-3.1.jar"/>
-	<classpathentry kind="lib" path="external/lib/asm-util-3.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/ea149956/sunspot/sdk/lib/SPOTWorld/lib/ant.jar"/>
+	<classpathentry exported="true" kind="lib" path="external/lib/asm-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="external/lib/asm-commons-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="external/lib/asm-util-3.1.jar"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ea149956/sunspot/sdk/lib/SPOTWorld/lib/ant.jar"/>
 	<classpathentry kind="output" path="external/eclipse-bin"/>
 </classpath>
