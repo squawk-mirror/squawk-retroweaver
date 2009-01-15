@@ -107,23 +107,21 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 
 	private class MethodTranslator extends MethodAdapter {
 	    protected boolean encounteredInvokeSpecialInit;
-	    protected boolean encounteredPutFieldThis;
+	    protected boolean hasQueuedPutFieldThis;
         protected int encounteredPutFieldThisOpcode;
         protected String[] encounteredPutFieldThisStrings = new String[3];
         protected String methodName;
-        protected String className;
         protected boolean isInit;
 	    
 		MethodTranslator(MethodVisitor methodVisitor, String className, String methodName) {
 			super(methodVisitor);
-			this.className = className;
 			this.methodName = methodName;
 			this.isInit = "<init>".equals(methodName);
 		}
 
         public void visitCode() {
 		    encounteredInvokeSpecialInit = false;
-		    encounteredPutFieldThis = false;
+		    hasQueuedPutFieldThis = false;
             super.visitCode();
         }
 
@@ -133,9 +131,8 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 
 		public void visitFieldInsn(final int opcode, final String owner,
 				final String name, final String desc) {
-
 		    if (isInit && opcode == Opcodes.PUTFIELD && name.equals("this$0") && !encounteredInvokeSpecialInit) {
-		        encounteredPutFieldThis = true;
+		        hasQueuedPutFieldThis = true;
 		        encounteredPutFieldThisOpcode = opcode;
                 encounteredPutFieldThisStrings[0] = owner;
                 encounteredPutFieldThisStrings[1] = name;
@@ -208,7 +205,8 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 				}
                 // Make sure we invoke the PUTFIELD we put on hold earlier
                 encounteredInvokeSpecialInit = true;
-                if (isInit && encounteredPutFieldThis) {
+                if (hasQueuedPutFieldThis && isInit && hasQueuedPutFieldThis) {
+                    hasQueuedPutFieldThis = false;
                     visitFieldInsn(encounteredPutFieldThisOpcode, encounteredPutFieldThisStrings[0], encounteredPutFieldThisStrings[1], encounteredPutFieldThisStrings[2]);
                 }
                 return;

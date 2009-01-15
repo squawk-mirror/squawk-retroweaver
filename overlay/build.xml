@@ -1,0 +1,61 @@
+<project name="retroweaver-overlay" default="help" basedir=".">
+
+    <property file="build.${os.name}.properties" />
+    <property file="build.properties" />
+    <property name="version" value="dev" />
+    <property name="release.dir" location="../release" />
+    <property name="release.src.dir" location="${release.dir}/src"/>
+    <property name="original.src.dir" location="../original/external/src/main/java"/>
+    <!-- src.dir property used by retroweaver build.xml to identify the source directory to compile, we want to overide -->
+    <property name="src.dir" value="${release.src.dir}"/>
+    <property name="squawk.dir" location="../../dev/squawk"/>
+    <property name="squawk.runtime.src.dir" location="${squawk.dir}/cldc/retroweaver"/>
+    <property name="squawk.tools.dir" location="${squawk.dir}/tools"/>
+
+    <target name="clean" description="Remove all build artifacts">
+        <ant dir="../original/external" target="clean"/>
+    </target>
+
+    <target name="build" description="Build retroweaver jar ready to be placed into the squawk tree">
+        <!-- Create a source tree with the original and the overlay source, in order to have all source fit into the src.dir property used by retroweave build -->
+        <delete failonerror="false" includeemptydirs="true">
+            <fileset dir="${release.src.dir}"/>
+        </delete>
+        <copy todir="${release.src.dir}">
+            <fileset dir="${original.src.dir}"/>
+        </copy>
+<!--
+        <delete  includeemptydirs="true">
+            <fileset dir="${release.src.dir}/net/sourceforge/retroweaver/runtime"/>
+            <fileset dir="${release.src.dir}/net/sourceforge/retroweaver/harmony/runtime"/>
+        </delete>
+-->
+        <copy todir="${release.src.dir}" overwrite="true">
+            <fileset dir="src"/>
+            <fileset dir="${squawk.runtime.src.dir}"/>
+        </copy>
+        <ant dir="../original/external" target="compile"/>
+        
+        <delete>
+            <fileset file="${release.dir}/retroweaver-${version}.jar"/>
+            <fileset file="${release.dir}/retroweaver-rt-${version}.jar"/>
+        </delete>
+    </target>
+    
+    <target name="tosquawk" depends="build" description="Build and copy resulting retroweaver jar into the squawk tree">
+        <copy todir="${squawk.tools.dir}">
+            <fileset file="${release.dir}/retroweaver-all-${version}.jar"/>
+        </copy>
+    </target>
+
+    <target name="osname">
+        <echo>os.name=${os.name}</echo>
+    </target>
+
+    <target name="help"    description="Print this help">
+        <exec executable="ant">
+            <arg value="-p"/>
+        </exec>
+    </target>
+
+</project>
