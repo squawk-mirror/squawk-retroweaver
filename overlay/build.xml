@@ -2,7 +2,7 @@
 
     <property file="build.${os.name}.properties" />
     <property file="build.properties" />
-    <property name="version" value="dev" />
+    <property name="version" value="squawk" />
     <property name="release.dir" location="../release" />
     <property name="release.src.dir" location="${release.dir}/src"/>
     <property name="original.src.dir" location="../original/external/src/main/java"/>
@@ -14,6 +14,9 @@
 
     <target name="clean" description="Remove all build artifacts">
         <ant dir="../original/external" target="clean"/>
+        <delete failonerror="false" includeemptydirs="true">
+            <fileset dir="${release.src.dir}"/>
+        </delete>
     </target>
 
     <target name="build" description="Build retroweaver jar ready to be placed into the squawk tree">

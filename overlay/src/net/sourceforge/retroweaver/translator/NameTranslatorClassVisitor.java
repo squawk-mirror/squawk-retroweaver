@@ -1,5 +1,7 @@
 package net.sourceforge.retroweaver.translator;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -131,7 +133,7 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 
 		public void visitFieldInsn(final int opcode, final String owner,
 				final String name, final String desc) {
-		    if (isInit && opcode == Opcodes.PUTFIELD && name.equals("this$0") && !encounteredInvokeSpecialInit) {
+		    if (isInit && opcode == Opcodes.PUTFIELD && (name.startsWith("this$") || name.startsWith("val$")) && !encounteredInvokeSpecialInit) {
 		        hasQueuedPutFieldThis = true;
 		        encounteredPutFieldThisOpcode = opcode;
                 encounteredPutFieldThisStrings[0] = owner;
@@ -164,9 +166,11 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 			int newOpcode = opcode;
 			String newDesc = translator.translateMethodDescriptor(desc);
 			
+			boolean isOwnerArrayType = false;
 			String lookupOwner = owner;
 			while (lookupOwner.startsWith("[")) {
 				lookupOwner = lookupOwner.substring(1);
+	            isOwnerArrayType = true;
 			}
 			final Mirror mirror = translator.getMirror(lookupOwner);
 
@@ -225,6 +229,10 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 							Type.getReturnType(newDesc), newArgTypes);
 					newDesc = translator.translateMethodDescriptor(newDesc);
 				}
+			} else if (isOwnerArrayType && opcode == Opcodes.INVOKEVIRTUAL && "clone".equals(name)) {
+			    // Handle the cloning of Arrays, this is really to handle the values method of an Enum
+			    super.visitMethodInsn(Opcodes.INVOKESTATIC, "com/sun/squawk/VM", "shallowCopy", "(Ljava/lang/Object;)Ljava/lang/Object;");
+			    return;
 			}
 
 			super.visitMethodInsn(newOpcode, newOwner, name, newDesc);
