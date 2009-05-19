@@ -8,7 +8,7 @@
     <property name="original.src.dir" location="../original/external/src/main/java"/>
     <!-- src.dir property used by retroweaver build.xml to identify the source directory to compile, we want to overide -->
     <property name="src.dir" value="${release.src.dir}"/>
-    <property name="squawk.dir" location="../../dev/squawk"/>
+    <property name="squawk.dir" location="../../javacard3/squawk"/>
     <property name="squawk.runtime.src.dir" location="${squawk.dir}/cldc/retroweaver"/>
     <property name="squawk.tools.dir" location="${squawk.dir}/tools"/>
 

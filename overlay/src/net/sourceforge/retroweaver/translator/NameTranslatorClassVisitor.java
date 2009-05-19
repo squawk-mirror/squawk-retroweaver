@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Vector;
 
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassAdapter;
@@ -110,8 +111,8 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 	private class MethodTranslator extends MethodAdapter {
 	    protected boolean encounteredInvokeSpecialInit;
 	    protected boolean hasQueuedPutFieldThis;
-        protected int encounteredPutFieldThisOpcode;
-        protected String[] encounteredPutFieldThisStrings = new String[3];
+        protected Vector<Integer> encounteredPutFieldThisOpcodes = new Vector<Integer>();
+        protected Vector<String[]> encounteredPutFieldThisStrings = new Vector<String[]>();
         protected String methodName;
         protected boolean isInit;
 	    
@@ -135,10 +136,12 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
 				final String name, final String desc) {
 		    if (isInit && opcode == Opcodes.PUTFIELD && (name.startsWith("this$") || name.startsWith("val$")) && !encounteredInvokeSpecialInit) {
 		        hasQueuedPutFieldThis = true;
-		        encounteredPutFieldThisOpcode = opcode;
-                encounteredPutFieldThisStrings[0] = owner;
-                encounteredPutFieldThisStrings[1] = name;
-                encounteredPutFieldThisStrings[2] = desc;
+		        encounteredPutFieldThisOpcodes.add(opcode);
+		        String[] strings = new String[3];
+                strings[0] = owner;
+                strings[1] = name;
+                strings[2] = desc;
+                encounteredPutFieldThisStrings.add(strings);
                 return;
 		    }
 			String newDesc = translator.getClassMirrorTranslationDescriptor(desc);
@@ -211,7 +214,11 @@ public class NameTranslatorClassVisitor extends ClassAdapter {
                 encounteredInvokeSpecialInit = true;
                 if (hasQueuedPutFieldThis && isInit && hasQueuedPutFieldThis) {
                     hasQueuedPutFieldThis = false;
-                    visitFieldInsn(encounteredPutFieldThisOpcode, encounteredPutFieldThisStrings[0], encounteredPutFieldThisStrings[1], encounteredPutFieldThisStrings[2]);
+                    for (int j=encounteredPutFieldThisOpcodes.size() - 1; j >= 0; j--) {
+                        int encounteredPutFieldThisOpcode = encounteredPutFieldThisOpcodes.elementAt(j);
+                        String[] strings = encounteredPutFieldThisStrings.elementAt(j);
+                        visitFieldInsn(encounteredPutFieldThisOpcode, strings[0], strings[1], strings[2]);
+                    }
                 }
                 return;
 			} else if (mirror.hasMethod(owner, name, newDesc, opcode)) {
