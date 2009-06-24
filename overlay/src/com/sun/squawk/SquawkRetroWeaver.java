@@ -27,12 +27,15 @@ public class SquawkRetroWeaver {
         SquawkRetroWeaver weaver = new SquawkRetroWeaver();
         weaver.retroweave(classesDir, outputDir, new WeaveListener() {
             public void weavingStarted(String msg) {
+                System.out.println("RetroWeaver:" + msg);
             }
             public void weavingPath(String sourcePath) {
             }
             public void weavingError(String msg) {
+                System.err.println("RetroWeaver ERROR:" + msg);
             }
             public void weavingCompleted(String msg) {
+                System.out.println("RetroWeaver:" + msg);
             }
         });
     }
